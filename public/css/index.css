@@ -1,0 +1,192 @@
+/* Reset & base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: 'Poppins', sans-serif;
+  color: #222;
+  background-color: #fffefc;
+  line-height: 1.6;
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 40px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  flex-wrap: wrap;
+}
+.logo {
+  font-size: 26px;
+  font-weight: 800;
+  color: #0d9f4b;
+}
+.logo span {
+  color: #f7931e;
+}
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.nav-links a {
+  text-decoration: none;
+  color: #222;
+  font-weight: 500;
+}
+.btn, .btn-outline {
+  padding: 10px 16px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+}
+.btn {
+  background-color: #0d9f4b;
+  color: white;
+}
+.btn-outline {
+  border: 2px solid #0d9f4b;
+  color: #0d9f4b;
+  background: transparent;
+}
+
+/* Hero */
+.hero {
+  background: url('/images/hero-shamba.jpg') center/cover no-repeat;
+  height: 85vh;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+.overlay {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+}
+.hero-content {
+  position: relative;
+  z-index: 10;
+  color: white;
+  max-width: 700px;
+  padding: 0 20px;
+}
+.hero-content h1 {
+  font-size: 3rem;
+  margin-bottom: 20px;
+}
+.hero-content p {
+  font-size: 1.2rem;
+  margin-bottom: 30px;
+}
+.btn-cta {
+  background-color: #f7931e;
+  color: white;
+  font-size: 1rem;
+  padding: 12px 28px;
+}
+
+/* Features Section */
+.features {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 40px;
+  padding: 60px 20px;
+  background-color: #fff;
+  text-align: center;
+}
+.feature {
+  max-width: 280px;
+}
+.feature img {
+  width: 200px;
+  margin-bottom: 20px;
+}
+.feature h3 {
+  color: #0d9f4b;
+  margin-bottom: 10px;
+}
+
+/* CTA */
+.cta {
+  background: #0d9f4b;
+  color: white;
+  text-align: center;
+  padding: 60px 20px;
+}
+.cta h2 {
+  margin-bottom: 20px;
+  font-size: 2rem;
+}
+
+/* Footer */
+footer {
+  background-color: #333;
+  color: #eee;
+  text-align: center;
+  padding: 20px;
+}
+footer a {
+  color: #bbb;
+  text-decoration: none;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .navbar {
+    flex-direction: column;
+    gap: 15px;
+    padding: 15px 20px;
+  }
+
+  .nav-links {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .hero-content h1 {
+    font-size: 2.2rem;
+  }
+
+  .hero-content p {
+    font-size: 1rem;
+  }
+
+  .features {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .btn, .btn-outline, .btn-cta {
+    font-size: 0.9rem;
+    padding: 10px 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-content h1 {
+    font-size: 1.7rem;
+  }
+
+  .hero-content p {
+    font-size: 0.95rem;
+  }
+
+  .cta h2 {
+    font-size: 1.4rem;
+  }
+
+  .logo {
+    font-size: 22px;
+  }
+}
