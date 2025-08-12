@@ -10,7 +10,8 @@
 ## 📌 Key Features
 
 - 🔍 Browse and search available plots
-- 📝 Create and manage user accounts
+- 📝 Create and manage user accounts (**with username, email, phone, and address**)
+- 🔑 Secure user login with hashed passwords
 - ❤️ Wishlist plots for later
 - 📅 Book site visits with agents
 - 💳 Secure payment integration (planned)
@@ -36,7 +37,8 @@
 - **Database:** MySQL
 - **Templating Engine:** EJS
 - **Styling:** Tailwind CSS (optionally) / Custom CSS
-- **Other Tools:** Live Server for preview, Git for version control
+- **Security:** Bcrypt for password hashing
+- **Other Tools:** Git for version control
 
 ---
 
@@ -44,11 +46,23 @@
 
 - [x] Landing page completed (mobile responsive + blur effect)
 - [x] Navbar partial integrated
-- [x] Register & login styling done
-- [x] Backend setup with Express and MySQL
+- [x] Register & login pages styled and functional
+
 - [ ] Wishlist feature (coming)
 - [ ] Payment module (planned)
 - [ ] Admin dashboard (planned)
+
+---
+
+## 📡 API Routes
+
+### Authentication
+| Method | Endpoint   | Description |
+|--------|-----------|-------------|
+| GET    | `/register` | Render the registration form |
+| POST   | `/register` | Save new user with hashed password |
+| GET    | `/login`    | Render the login form |
+| POST   | `/login`    | Authenticate user via email or username |
 
 ---
 
@@ -60,6 +74,3 @@ _Add screenshots of the landing page, register page, or mobile menu here._
 ## 📜 License
 
 This project is for educational purposes and personal portfolio use. All assets used (images/icons) are subject to their respective licenses.
-
----
-
