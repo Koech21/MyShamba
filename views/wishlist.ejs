@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PLOTTOSHA | Wishlist</title>
+  <link rel="stylesheet" href="/css/wishlist.css">
+</head>
+<body>
+  <%- include('partials/navbar') %>
+
+  <main class="wishlist-container">
+    <section class="header">
+      <h1 class="title">My Wishlist</h1>
+      <p class="subtitle">Your saved plots for future purchase</p>
+      <input 
+        type="text" 
+        id="wishlistSearch" 
+        class="search-bar"
+        placeholder="Search your saved plots..."
+      >
+    </section>
+
+    <section id="wishlistGrid" class="wishlist-grid"></section>
+
+    <section id="emptyState" class="empty-state hidden">
+      <div class="empty-icon">❤️</div>
+      <h3 class="empty-title">Your wishlist is empty</h3>
+      <p class="empty-text">
+        You haven’t saved any plots yet. Explore listings to find your dream land!
+      </p>
+      <a href="/listings" class="browse-btn">Browse Listings</a>
+    </section>
+  </main>
+
+  <div id="toast" class="toast"></div>
+
+  <script src="/js/wishlist.js"></script>
+</body>
+</html>

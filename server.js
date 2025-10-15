@@ -65,7 +65,7 @@ app.post("/login", (req, res) => {
     }
 
     // Here you can set up session or token logic
-    res.send(`Welcome ${user.username}!`);
+    res.redirect("/listings");
   });
 });
 
@@ -99,6 +99,34 @@ app.post("/register", async (req, res) => {
     res.send("Server error");
   }
 });
+
+app.get("/404", (req, res) => {
+  res.render("404.ejs");
+});
+
+app.get('/listings', (req, res) => {
+  const sql = "SELECT * FROM lands WHERE is_sold = 0";
+  dbConnection.query(sql, (err, results) => {
+    if (err) {
+      console.error('Error fetching listings:', err);
+      return res.status(500).send('Error fetching listings');
+    }
+    res.render('listings', { listings: results });
+  });
+});
+
+app.get('/wishlist', (req, res) => {
+  const sql = `
+    SELECT * FROM wishlist `;
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('Error fetching wishlist:', err);
+      return res.status(500).send('Error fetching wishlist');
+    }
+    res.render('wishlist', { wishlist: results });
+  });
+});
+
 
 
 // at the end of the routes -- we  start the app using listen method - telling node to run and wait incoming requests
