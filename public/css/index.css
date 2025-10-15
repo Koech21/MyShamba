@@ -260,6 +260,20 @@ footer a {
   }
 }
 
+/* Search Bar */
+input[type="text"] {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+    border-radius: 8px;
+  font-size: 1rem;
+  margin-bottom: 20px;
+}
+input[type="text"]:focus {
+  border-color: #0d9f4b;
+  outline: none;
+}
+
 /* How It Works */
 .how-it-works {
   padding: 60px 20px;
