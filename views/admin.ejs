@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title> Admin Dashboard</title>
+  <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+  
+  <!-- navbar -->
+  <%- include('partials/navbar') %>
+
+
+
+  <header class="admin-header">
+    <h1>Admin Panel</h1>
+  </header>
+
+  <main class="admin-container">
+    <section class="add-form">
+      <h2>Add New Listing</h2>
+      <form action="/admin/add" method="POST" enctype="multipart/form-data">
+        <div class="form-grid">
+          <input type="text" name="title" placeholder="Title" required>
+          <input type="text" name="location" placeholder="Location" required>
+          <input type="number" name="price" placeholder="Price (Ksh)" required>
+          <input type="number" step="0.1" name="size" placeholder="Size (acres)" required>
+          <input type="text" name="category" placeholder="Category (e.g., Residential)" required>
+          <input type="text" name="seller_id" placeholder="Seller ID" required>
+          <textarea name="description" placeholder="Description" rows="3"></textarea>
+          <input type="file" name="image" accept="image/*" required>
+        </div>
+        <button type="submit" class="add-btn">Add Listing</button>
+      </form>
+    </section>
+
+    <section class="listings-section">
+      <h2>Current Listings</h2>
+      <div class="listings-grid">
+        <% lands.forEach(land => { %>
+          <div class="listing-card <%= land.is_sold ? 'sold' : '' %>">
+            <img src="<%= land.image_url %>" alt="<%= land.title %>">
+            <div class="info">
+              <h3><%= land.title %></h3>
+              <p class="category"><%= land.category %></p>
+              <p><strong>Location:</strong> <%= land.location %></p>
+              <p><strong>Price:</strong> Ksh <%= land.price.toLocaleString() %></p>
+              <p><strong>Size:</strong> <%= land.size %> acres</p>
+            </div>
+            <div class="actions">
+              <% if (land.is_sold) { %>
+                <span class="sold-badge">SOLD</span>
+              <% } else { %>
+                <form action="/admin/delete/<%= land.id %>" method="POST">
+                  <button class="delete-btn">Remove</button>
+                </form>
+              <% } %>
+            </div>
+          </div>
+        <% }) %>
+      </div>
+    </section>
+  </main>
+  <script src="/js/main.js"></script>
+</body>
+</html>

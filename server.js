@@ -2,6 +2,9 @@ const express = require("express");
 const mysql = require("mysql");
 const session = require("express-session");
 const bcrypt = require("bcrypt");
+const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 
 
 const dbConnection = mysql.createConnection({
@@ -31,6 +34,18 @@ app.use(session({
   cookie: { secure: false, maxAge: 10 * 60 * 1000 } // 10 mins
 }));
 
+
+// Set storage engine
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "public/images"); // Folder to store uploads
+  },
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname)); // unique filename
+  }
+});
+
+const upload = multer({ storage });
 
 app.set("view engine", "ejs");
 
@@ -115,10 +130,29 @@ app.get('/listings', (req, res) => {
   });
 });
 
+app.get('/about', (req, res) => {
+  res.render('about.ejs');
+});
+
+app.get('/contact', (req, res) => {
+  res.render('contact.ejs');
+});
+
+
+// GET route for viewing a specific listing
+app.get('/listing/:id', (req, res) => {
+  const landId = req.params.id;
+  const sql = "SELECT * FROM lands WHERE id = ?";
+  dbConnection.query(sql, [landId], (err, results) => {
+    if (err) throw err;
+    res.render('listing', { land: results[0] });
+  });
+});
+
 app.get('/wishlist', (req, res) => {
   const sql = `
     SELECT * FROM wishlist `;
-  db.query(sql, (err, results) => {
+  dbConnection.query(sql, (err, results) => {
     if (err) {
       console.error('Error fetching wishlist:', err);
       return res.status(500).send('Error fetching wishlist');
@@ -126,6 +160,77 @@ app.get('/wishlist', (req, res) => {
     res.render('wishlist', { wishlist: results });
   });
 });
+
+app.get("/admin", (req, res) => {
+  dbConnection.query("SELECT * FROM lands", (err, results) => {
+    if (err) throw err;
+    // This renders the admin page and sends the data from the DB
+    res.render("admin", { lands: results });
+  });
+});
+
+app.post("/admin/add", upload.single("image"), (req, res) => {
+  const { title, description, location, price, size_in_acres, category, seller_id } = req.body;
+  const image_url = `/images/${req.file.filename}`;
+
+  const sql = `
+    INSERT INTO lands (title, description, location, price, size_in_acres, category, seller_id, image_url, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+  `;
+  dbConnection.query(sql, [title, description, location, price, size_in_acres, category, seller_id, image_url], (err) => {
+    if (err) throw err;
+    res.redirect("/admin");
+  });
+});
+
+// DELETE listing by ID (from Admin Panel)
+
+
+app.post("/admin/delete/:id", (req, res) => {
+  const landId = req.params.id;
+
+  // Step 1: Fetch the image path from the DB
+  const getImageQuery = "SELECT image_url FROM lands WHERE id = ?";
+  dbConnection.query(getImageQuery, [landId], (err, results) => {
+    if (err) {
+      console.error("Error retrieving image info:", err);
+      return res.status(500).send("Error retrieving image info");
+    }
+
+    if (results.length === 0) {
+      console.warn("No land found with that ID.");
+      return res.redirect("/admin");
+    }
+
+    const imageUrl = results[0].image_url;
+
+    // remove the leading '/images/' part
+    const imageFile = imageUrl.replace("/images/", "");
+    const imagePath = path.join(__dirname, "public", "images", imageFile);
+
+    // Step 2: Delete the image file
+    fs.unlink(imagePath, (fsErr) => {
+      if (fsErr && fsErr.code !== "ENOENT") {
+        console.error("Error deleting image file:", fsErr);
+      } else {
+        console.log(`Deleted image file: ${imageFile}`);
+      }
+
+      // Step 3: Delete the land record
+      const deleteSQL = "DELETE FROM lands WHERE id = ?";
+      dbConnection.query(deleteSQL, [landId], (dbErr) => {
+        if (dbErr) {
+          console.error("Error deleting land:", dbErr);
+          return res.status(500).send("Error deleting land");
+        }
+
+        console.log(`Deleted land with ID: ${landId}`);
+        res.redirect("/admin");
+      });
+    });
+  });
+});
+
 
 
 

@@ -12,10 +12,10 @@ body {
     padding: 2rem;
   }
   
-  .search-section {
-    text-align: center;
-    margin-bottom: 2rem;
-  }
+.search-section {
+  text-align: center;
+  margin-bottom: 2rem;
+}
   
   .title {
     font-size: 2.5rem;
@@ -34,6 +34,7 @@ body {
     outline: none;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
   }
+ 
   
   .listings-grid {
     display: grid;
@@ -47,6 +48,7 @@ body {
     overflow: hidden;
     box-shadow: 0 4px 10px rgba(0,0,0,0.1);
     transition: transform 0.3s;
+    position: relative;
   }
   
   .listing-card:hover {
@@ -70,17 +72,26 @@ body {
   }
   
   .card-body .location,
-  .card-body .category,
   .card-body .size {
     color: #777;
     font-size: 0.9rem;
   }
-  
-  .price {
-    color: #f7931e;
+
+  .card-body .category {
+    position: absolute;
+    top: 5px;
+    right: 10px;
+    color: #0d9f4b;
+    background-color: rgba(255, 255, 255, 0);
+    padding: 5px 10px;
+    border-radius: 15px;  transition: all 0.3s;
+    font-size: 0.9rem;
     font-weight: 600;
-    font-size: 1.1rem;
-    margin: 0.5rem 0;
+  }
+
+  .card-body .category:hover{
+    background-color: #0d9f4b ;
+    color: white ;
   }
   
   .card-actions {

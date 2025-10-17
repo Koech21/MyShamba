@@ -64,3 +64,57 @@
     display: none !important;
   }
 }
+
+
+
+
+import multer from "multer";
+import path from "path";
+import db from "../config/db.js"; // adjust path to your DB connection
+
+// Setup storage for uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => cb(null, "public/images"),
+  filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
+});
+const upload = multer({ storage });
+
+// Add land route
+app.post("/admin/add-land", upload.single("image"), (req, res) => {
+  const { title, description, location, price, size_in_acres, category } = req.body;
+  const image_url = req.file ? `images/${req.file.filename}` : null;
+
+  // Log to see if form data arrives
+  console.log("Form data:", req.body);
+  console.log("Image file:", req.file);
+
+  if (!title || !description || !location || !price || !size_in_acres || !category || !image_url) {
+    return res.status(400).send("Missing required fields");
+  }
+
+  const sql = `
+    INSERT INTO lands (title, description, location, price, size_in_acres, image_url, category, seller_id, is_sold, created)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
+  `;
+
+  const values = [
+    title,
+    description,
+    location,
+    price,
+    size_in_acres,
+    image_url,
+    category,
+    1, // seller_id (admin)
+    0  // is_sold = false
+  ];
+
+  db.query(sql, values, (err, result) => {
+    if (err) {
+      console.error("Error inserting data:", err);
+      return res.status(500).send("Database error");
+    }
+    console.log("Land successfully added:", result.insertId);
+    res.redirect("/admin");
+  });
+});
