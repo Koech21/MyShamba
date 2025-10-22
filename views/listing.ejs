@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= land.title %> | PLOTTOSHA</title>
+  <link rel="stylesheet" href="/css/listing.css">
+</head>
+<body>
+  <%- include('partials/navbar') %>
+
+  <section class="listing-details">
+    <div class="details-container">
+      <div class="image-section">
+        <img src="<%= land.image_url %>" alt="<%= land.title %>">
+      </div>
+
+      <div class="info-section">
+        <h1><%= land.title %></h1>
+        <p><strong>Category:</strong> <%= land.category %></p>
+        <p><strong>Location:</strong> <%= land.location %></p>
+        <p><strong>Size:</strong> <%= land.size %></p>
+        <p><strong>Price:</strong> Ksh <%= land.price.toLocaleString() %></p>
+        <p><%= land.description %></p>
+        <div class="contact-section">
+            <% if (user && user.isLoggedIn && user.userId !== land.seller_id) { %>
+              <form action="/messages/<%= land.id %>/<%= land.seller_id %>" method="get">
+                <button class="message-btn">Message Seller</button>
+              </form>
+            <% } else if (!user || !user.isLoggedIn) { %>
+              <a href="/login" class="message-btn">Login to Message Seller</a>
+            <% } else { %>
+              <p class="self-msg">This is your own listing.</p>
+            <% } %>
+          </div>
+          
+
+
+        <a href="/listings" class="back-btn">← Back to Listings</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>© <%= new Date().getFullYear() %> PLOTTOSHA</p>
+  </footer>
+</body>
+</html>
+

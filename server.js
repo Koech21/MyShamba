@@ -34,6 +34,11 @@ app.use(session({
   cookie: { secure: false, maxAge: 10 * 60 * 1000 } // 10 mins
 }));
 
+// Make session data available to all EJS templates
+app.use((req, res, next) => {
+  res.locals.user = req.session; // makes session data available to EJS
+  next();
+});
 
 // Set storage engine
 const storage = multer.diskStorage({
@@ -79,7 +84,12 @@ app.post("/login", (req, res) => {
       return res.status(401).send("Invalid username/email or password");
     }
 
-    // Here you can set up session or token logic
+    // Save user session
+    req.session.userId = user.id;
+    req.session.username = user.username;
+    req.session.email = user.email;
+    req.session.isLoggedIn = true;
+    
     res.redirect("/listings");
   });
 });
@@ -139,15 +149,25 @@ app.get('/contact', (req, res) => {
 });
 
 
-// GET route for viewing a specific listing
-app.get('/listing/:id', (req, res) => {
+app.get("/listing/:id", (req, res) => {
   const landId = req.params.id;
   const sql = "SELECT * FROM lands WHERE id = ?";
+
   dbConnection.query(sql, [landId], (err, results) => {
-    if (err) throw err;
-    res.render('listing', { land: results[0] });
+    if (err) {
+      console.error("Error fetching land details:", err);
+      return res.status(500).send("Error fetching land details");
+    }
+
+    if (results.length === 0) {
+      return res.status(404).send("Land not found");
+    }
+
+    const land = results[0];
+    res.render("listing", { land });
   });
 });
+
 
 app.get('/wishlist', (req, res) => {
   const sql = `
@@ -230,6 +250,55 @@ app.post("/admin/delete/:id", (req, res) => {
     });
   });
 });
+
+app.get("/about", (req, res ) =>
+  res.render("about")
+)
+
+app.get("/logout", (req, res) => {
+  req.session.destroy((err) => {
+    if (err) console.error(err);
+    res.redirect("/login");
+  });
+});
+
+app.get("/messages/:listingId/:receiverId", (req, res) => {
+  if (!req.session.userId) {
+    return res.redirect("/login");
+  }
+
+  const { listingId, receiverId } = req.params;
+  const senderId = req.session.userId;
+
+  const sql = `
+    SELECT * FROM messages 
+    WHERE (sender_id = ? AND receiver_id = ?)
+       OR (sender_id = ? AND receiver_id = ?)
+    ORDER BY sent_at ASC
+  `;
+
+  dbConnection.query(sql, [senderId, receiverId, receiverId, senderId], (err, messages) => {
+    if (err) return res.status(500).send("Error loading messages");
+
+    res.render("chat.ejs", { messages, listingId, receiverId, senderId });
+  });
+});
+
+app.post("/messages/send", (req, res) => {
+  if (!req.session.userId) {
+    return res.status(401).send("Please log in first.");
+  }
+
+  const { receiver_id, listing_id, message } = req.body;
+  const sender_id = req.session.userId;
+
+  const sql = "INSERT INTO messages (sender_id, receiver_id, listing_id, message) VALUES (?, ?, ?, ?)";
+  dbConnection.query(sql, [sender_id, receiver_id, listing_id, message], (err) => {
+    if (err) return res.status(500).send("Error sending message");
+    res.redirect(`/messages/${listing_id}/${receiver_id}`);
+  });
+});
+
 
 
 

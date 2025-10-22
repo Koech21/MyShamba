@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat | PLOTTOSHA</title>
+  <link rel="stylesheet" href="/css/chat.css">
+</head>
+<body>
+  <%- include('partials/navbar') %>
+
+  <section class="chat-container">
+    <div class="chat-box">
+      <% messages.forEach(msg => { %>
+        <div class="chat-message <%= msg.sender_id === senderId ? 'sent' : 'received' %>">
+          <p><%= msg.message %></p>
+          <small><small><%= new Date(msg.sent_at).toLocaleString() %></small>
+        </small>
+        </div>
+      <% }) %>
+    </div>
+
+    <form action="/messages/send" method="POST" class="chat-form">
+      <input type="hidden" name="receiver_id" value="<%= receiverId %>">
+      <input type="hidden" name="listing_id" value="<%= listingId %>">
+      <input type="text" name="message" placeholder="Type your message..." required>
+      <button type="submit">Send</button>
+    </form>
+  </section>
+
+</body>
+<script src="main.js"></script>
+</html>

@@ -4,8 +4,13 @@
     <li><a href="/">Home</a></li>
     <li><a href="/listings">Land Listings</a></li>
     <li><a href="/about">About</a></li>
-    <li><a href="/login" class="btn-outline">Login</a></li>
-    <li><a href="/register" class="btn">Register</a></li>
+    <% if (user && user.isLoggedIn) { %>
+      <li class="welcome-msg">Welcome, <%= user.username %> 👋</li>
+      <li><a href="/logout" class="logout-btn">Logout</a></li>
+    <% } else { %>
+      <li class="btn-outline"><a href="/login">Login</a></li>
+      <li class="btn"><a href="/register">Register</a></li>
+    <% } %>
   </ul>
   <div class="hamburger" id="hamburger">
     <span></span>
@@ -17,8 +22,13 @@
       <li><a href="/">Home</a></li>
       <li><a href="/listings">Land Listings</a></li>
       <li><a href="/about">About</a></li>
-      <li><a href="/login" class="btn-outline">Login</a></li>
-      <li><a href="/register" class="btn">Register</a></li>
+      <% if (user && user.isLoggedIn) { %>
+        <li class="welcome-msg">Welcome, <%= user.username %> 👋</li>
+        <li><a href="/logout" class="logout-btn">Logout</a></li>
+      <% } else { %>
+        <li class="btn-outline"><a href="/login">Login</a></li>
+        <li class="btn"><a href="/register">Register</a></li>
+      <% } %>
     </ul>
   </div>
 </header>

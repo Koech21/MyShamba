@@ -330,4 +330,57 @@ input[type="text"]:focus {
     from { opacity: 0; transform: translateY(20px); }
     to { opacity: 1; transform: translateY(0); }
   }
+
+  .listings-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    padding: 2rem;
+    justify-items: center;
+  }
+  
+  .listing-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    width: 100%;
+    max-width: 320px;
+  }
+  
+  .listing-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  }
+  
+  .welcome-msg {
+    background-color: #0d9f4b;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: 0.3s;
+  }
+  
+  .welcome-msg:hover {
+    background-color: #f7931e;
+    color: #fff;
+  }
+  .logout-btn {
+    background-color: #f7931e; /* PLOTTOSHA orange */
+    color: #fff;
+    padding: 6px 14px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 10px rgba(247, 147, 30, 0.3);
+  }
+  
+  .logout-btn:hover {
+    background-color: #0d9f4b; /* PLOTTOSHA green */
+    box-shadow: 0 4px 15px rgba(13, 159, 75, 0.4);
+    transform: translateY(-2px);
+  }
   

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About | PLOTTOSHA</title>
+    <link rel="stylesheet" href="/css/about.css" />
+    <link rel="icon" href="/images/logo.png" />
+  </head>
+  <body>
+    <%- include("partials/navbar") %>
+
+    <!-- HERO -->
+    <section class="about-hero">
+      <div class="overlay"></div>
+      <div class="hero-content">
+        <div class="logo">PLOT<span>TOSHA</span></div>
+        <h1>About <span>PLOTTOSHA</span>
+        </h1>
+        <p>Empowering Kenyans to discover, trust, and own land with confidence.</p>
+      </div>
+    </section>
+
+    <!-- STORY -->
+    <section class="about-story">
+      <div class="container">
+        <h2>Our Story</h2>
+        <p>
+          <strong>PLOTTOSHA</strong> was born from a vision to simplify land buying in Kenya.
+          It connects buyers, agents, and administrators through a clean, secure, and modern platform.
+          Whether for farming, development, or investment — we make verified land discovery effortless.
+        </p>
+      </div>
+    </section>
+
+    <!-- FOUNDER -->
+    <section class="founder-section">
+      <div class="container founder">
+        <img src="/images/founder.jpg" alt="Founder Photo" class="founder-img" />
+        <div class="founder-info">
+          <h2>Meet the Founder</h2>
+          <h3>Ryan Kipkoech</h3>
+          <p>
+            A passionate web developer and creative thinker, Ryan believes technology
+            should make life simpler. <strong>PLOTTOSHA</strong> represents innovation,
+            transparency, and empowerment — a digital step toward transforming Kenya’s
+            real estate experience.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <p>© <%= new Date().getFullYear() %> PLOTTOSHA. All rights reserved.</p>
+    </footer>
+    <script src="/js/main.js"></script>
+  </body>
+</html>
