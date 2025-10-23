@@ -1,5 +1,5 @@
 const express = require("express");
-const mysql = require("mysql");
+const mysql = require("mysql2");
 const session = require("express-session");
 const bcrypt = require("bcrypt");
 const multer = require("multer");
@@ -13,7 +13,7 @@ const dbConnection = mysql.createConnection({
   user: "root",
   password: "HcyvppwcVjGtpneHrgVypkaUlDbsLmgk",
   database: "railway",
-  port: 29259,
+  port: 29259
 });
 // test db connection
 dbConnection.connect((error) => {
