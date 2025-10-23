@@ -39,7 +39,21 @@ document.addEventListener('DOMContentLoaded', function() {
     errorDiv.style.display = 'none';
     
     fetch('/admin/users')
-      .then(response => response.json())
+      .then(response => {
+        if (response.status === 401) {
+          alert('Session expired. Please log in again.');
+          window.location.href = '/login';
+          return;
+        }
+        if (response.status === 403) {
+          alert('Access denied. Admin privileges required.');
+          return;
+        }
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+      })
       .then(users => {
         loading.style.display = 'none';
         tableBody.innerHTML = '';
@@ -64,11 +78,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         tableContainer.style.display = 'block';
       })
-      .catch(error => {
-        console.error('Error loading users:', error);
-        loading.style.display = 'none';
-        errorDiv.style.display = 'block';
-      });
+        .catch(error => {
+          loading.style.display = 'none';
+          errorDiv.style.display = 'block';
+        });
   }
 
 // Initialize modal functionality
@@ -77,7 +90,6 @@ function initializeModal() {
   const closeBtn = document.querySelector('.close');
   
   if (!modal) {
-    console.error('Modal element not found');
     return;
   }
 
@@ -108,8 +120,6 @@ function initializeModal() {
         return;
       }
       
-      console.log('Sending role update request:', { userId, newRole });
-      
       fetch('/admin/users/update-role', {
         method: 'POST',
         headers: {
@@ -121,14 +131,21 @@ function initializeModal() {
         })
       })
       .then(response => {
-        console.log('Response status:', response.status);
+        if (response.status === 401) {
+          alert('Session expired. Please log in again.');
+          window.location.href = '/login';
+          return;
+        }
+        if (response.status === 403) {
+          alert('Access denied. Admin privileges required.');
+          return;
+        }
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         return response.json();
       })
       .then(data => {
-        console.log('Response data:', data);
         if (data.success) {
           alert('User role updated successfully!');
           modal.style.display = 'none';
@@ -138,7 +155,6 @@ function initializeModal() {
         }
       })
       .catch(error => {
-        console.error('Error updating role:', error);
         alert('Error updating user role: ' + error.message);
       });
     });
@@ -158,7 +174,6 @@ function openRoleModal(userId, userName, currentRole) {
     newRoleSelect.value = currentRole;
     modal.style.display = 'block';
   } else {
-    console.error('Modal elements not found');
     alert('Error: Modal elements not found');
   }
 }

@@ -25,6 +25,7 @@ dbConnection.connect((error) => {
 
 const app = express();
 app.use(express.urlencoded({ extended: true }));
+app.use(express.json()); // Parse JSON request bodies - REQUIRED for API endpoints
 app.use(express.static("public")); //static files- css, js, images, etc. explanation: express.static is a middleware function that serves static files from the public directory.
 
 app.use(session({
@@ -240,32 +241,26 @@ app.get("/admin/users", requireAdmin, (req, res) => {
 
 // Route to update user role
 app.post("/admin/users/update-role", requireAdmin, (req, res) => {
-  console.log("Role update request received:", req.body);
   const { userId, newRole } = req.body;
   
   if (!userId || !newRole) {
-    console.log("Missing userId or newRole:", { userId, newRole });
     return res.status(400).json({ error: "User ID and role are required" });
   }
   
-  if (!['user', 'seller', 'admin'].includes(newRole)) {
-    console.log("Invalid role:", newRole);
-    return res.status(400).json({ error: "Invalid role. Must be 'user', 'seller', or 'admin'" });
+  if (!['buyer', 'seller', 'admin'].includes(newRole)) {
+    return res.status(400).json({ error: "Invalid role. Must be 'buyer', 'seller', or 'admin'" });
   }
   
-  console.log("Updating user role:", { userId, newRole });
   dbConnection.query("UPDATE users SET role = ? WHERE id = ?", [newRole, userId], (err, result) => {
     if (err) {
       console.error("Error updating user role:", err);
       return res.status(500).json({ error: "Error updating user role" });
     }
     
-    console.log("Update result:", result);
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: "User not found" });
     }
     
-    console.log("User role updated successfully");
     res.json({ success: true, message: "User role updated successfully" });
   });
 });
