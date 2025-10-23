@@ -3,7 +3,7 @@
 **PLOTTOSHA** is a comprehensive Kenyan-inspired online platform designed to simplify land discovery, showcasing, and purchasing for users across the country. With a clean, responsive interface and advanced features, the platform connects buyers, agents, and administrators in a seamless digital experience.
 
 ## 🌐 Live Preview
-> https://koech21.github.io/LANDTOSHA-TEST/
+> myshamba-production.up.railway.app
 
 ---
 
@@ -302,8 +302,17 @@
 
 ---
 
+
+ 
+
+---
+
 ## 📸 Screenshots
-_Add screenshots of the landing page, register page, or mobile menu here._
+
+### 🏠 **Landing Page**
+![PLOTTOSHA Landing Page](/images/Screenshot%202025-10-23%20165850.png)
+
+*Beautiful, responsive landing page showcasing the Kenyan land marketplace with hero section, features, and call-to-action elements.*
 
 ---
 
