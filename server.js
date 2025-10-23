@@ -5,6 +5,7 @@ const bcrypt = require("bcrypt");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const nodemailer = require("nodemailer");
 
 
 const dbConnection = mysql.createConnection({
@@ -63,6 +64,34 @@ const storage = multer.diskStorage({
 });
 
 const upload = multer({ storage });
+
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "plottosha@gmail.com",
+    pass: "dyit tcdo whro jtto" // This should be an App Password, not your regular password
+  },
+});
+
+
+// Function to send message notification email
+const sendMessageNotification = async (receiverEmail, senderName, messageText) => {
+  try {
+    const mailOptions = {
+      from: "plottosha@gmail.com",
+      to: receiverEmail,
+      subject: "New Message from PLOTTOSHA",
+      text: `You have received a new message from ${senderName}:\n\n${messageText}`
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log("Message notification sent successfully");
+  } catch (error) {
+    console.error("Error sending message notification:", error);
+  }
+};
+
 
 app.set("view engine", "ejs");
 
@@ -338,6 +367,130 @@ app.get("/logout", (req, res) => {
   });
 });
 
+// Forgot Password Routes
+app.get("/forgot-password", (req, res) => {
+  res.render("forgot-password.ejs");
+});
+
+app.post("/forgot-password", async (req, res) => {
+  const { email } = req.body;
+  
+  try {
+    // Check if email exists
+    const sql = "SELECT id, username FROM users WHERE email = ?";
+    dbConnection.query(sql, [email], async (err, results) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send("Error processing request");
+      }
+      
+      if (results.length === 0) {
+        return res.status(404).send("Email not found");
+      }
+      
+      const user = results[0];
+      const resetToken = require('crypto').randomBytes(32).toString('hex');
+      const expiresAt = new Date(Date.now() + 3600000); // 1 hour from now
+      
+      // Store reset token in database
+      const insertTokenSql = "INSERT INTO password_reset_tokens (user_id, token, expires_at) VALUES (?, ?, ?)";
+      dbConnection.query(insertTokenSql, [user.id, resetToken, expiresAt], (err) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).send("Error generating reset token");
+        }
+        
+        // Send reset email
+        const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}`;
+        const mailOptions = {
+          from: "plottosha@gmail.com",
+          to: email,
+          subject: "Password Reset - PLOTTOSHA",
+          text: `Hello ${user.username},\n\nYou requested a password reset. Click the link below to reset your password:\n\n${resetUrl}\n\nThis link will expire in 1 hour.\n\nIf you didn't request this, please ignore this email.\n\nBest regards,\nPLOTTOSHA Team`
+        };
+        
+        transporter.sendMail(mailOptions, (error, info) => {
+          if (error) {
+            console.error("Error sending reset email:", error);
+            return res.status(500).send("Error sending reset email");
+          }
+          res.send("Password reset email sent successfully!");
+        });
+      });
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server error");
+  }
+});
+
+app.get("/reset-password", (req, res) => {
+  const { token } = req.query;
+  
+  if (!token) {
+    return res.status(400).send("Invalid reset link");
+  }
+  
+  // Check if token is valid and not expired
+  const sql = "SELECT * FROM password_reset_tokens WHERE token = ? AND expires_at > NOW()";
+  dbConnection.query(sql, [token], (err, results) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).send("Error validating token");
+    }
+    
+    if (results.length === 0) {
+      return res.status(400).send("Invalid or expired reset link");
+    }
+    
+    res.render("reset-password.ejs", { token });
+  });
+});
+
+app.post("/reset-password", async (req, res) => {
+  const { token, password } = req.body;
+  
+  try {
+    // Verify token
+    const verifySql = "SELECT user_id FROM password_reset_tokens WHERE token = ? AND expires_at > NOW()";
+    dbConnection.query(verifySql, [token], async (err, results) => {
+      if (err) {
+        console.error(err);
+        return res.status(500).send("Error validating token");
+      }
+      
+      if (results.length === 0) {
+        return res.status(400).send("Invalid or expired reset link");
+      }
+      
+      const userId = results[0].user_id;
+      
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(password, 10);
+      
+      // Update password
+      const updateSql = "UPDATE users SET password = ? WHERE id = ?";
+      dbConnection.query(updateSql, [hashedPassword, userId], (err) => {
+        if (err) {
+          console.error(err);
+          return res.status(500).send("Error updating password");
+        }
+        
+        // Delete used token
+        const deleteSql = "DELETE FROM password_reset_tokens WHERE token = ?";
+        dbConnection.query(deleteSql, [token], (err) => {
+          if (err) console.error("Error deleting token:", err);
+        });
+        
+        res.send("Password reset successfully! <a href='/login'>Click here to login</a>");
+      });
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Server error");
+  }
+});
+
 app.get("/messages/:listingId/:receiverId", (req, res) => {
   if (!req.session.userId) {
     return res.redirect("/login");
@@ -362,7 +515,7 @@ app.get("/messages/:listingId/:receiverId", (req, res) => {
 
 app.post("/messages/send", (req, res) => {
   if (!req.session.userId) {
-    return res.status(401).send("Please log in first.");
+    return res.status(401).send('<p>Please <a href="/login">log in</a> first.</p>');
   }
 
   const { receiver_id, listing_id, message } = req.body;
@@ -371,6 +524,25 @@ app.post("/messages/send", (req, res) => {
   const sql = "INSERT INTO messages (sender_id, receiver_id, listing_id, message) VALUES (?, ?, ?, ?)";
   dbConnection.query(sql, [sender_id, receiver_id, listing_id, message], (err) => {
     if (err) return res.status(500).send("Error sending message");
+
+    // Fetch receiver's email and sender's username
+    const getUserSql = "SELECT email, username FROM users WHERE id = ?";
+    const getSenderSql = "SELECT username FROM users WHERE id = ?";
+    
+    dbConnection.query(getUserSql, [receiver_id], (err, userResult) => {
+      if (err) return console.error(err);
+
+      const receiverEmail = userResult[0].email;
+      
+      // Get sender's username
+      dbConnection.query(getSenderSql, [sender_id], (err, senderResult) => {
+        if (err) return console.error(err);
+        
+        const senderName = senderResult[0].username;
+        sendMessageNotification(receiverEmail, senderName, message);
+      });
+    });
+
     res.redirect(`/messages/${listing_id}/${receiver_id}`);
   });
 });
@@ -448,4 +620,5 @@ app.post("/messages/reply/:id", (req, res) => {
 app.listen(3000, () => {
     console.log("Server is running on port 3000");
   });
+  
 
