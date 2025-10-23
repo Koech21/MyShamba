@@ -31,7 +31,7 @@ app.use(session({
   secret: "21Cabbage",
   resave: false,
   saveUninitialized: false,
-  cookie: { secure: false, maxAge: 10 * 60 * 1000 } // 10 mins
+  cookie: { secure: false, maxAge: 10 * 60 * 1000000 } 
 }));
 
 // Make session data available to all EJS templates
@@ -39,6 +39,17 @@ app.use((req, res, next) => {
   res.locals.user = req.session; // makes session data available to EJS
   next();
 });
+
+// Admin authentication middleware
+const requireAdmin = (req, res, next) => {
+  if (!req.session.isLoggedIn) {
+    return res.redirect('/login');
+  }
+  if (req.session.role !== 'admin') {
+    return res.status(403).send('Access denied. Admin privileges required.');
+  }
+  next();
+};
 
 // Set storage engine
 const storage = multer.diskStorage({
@@ -89,6 +100,7 @@ app.post("/login", (req, res) => {
     req.session.username = user.username;
     req.session.email = user.email;
     req.session.isLoggedIn = true;
+    req.session.role = user.role || 'user'; // Add role to session
     
     res.redirect("/listings");
   });
@@ -107,10 +119,11 @@ app.post("/register", async (req, res) => {
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
+    const role = 'user'; // Default role for new users
 
     dbConnection.query(
-      "INSERT INTO users (name, username, email, phone, address, password) VALUES (?, ?, ?, ?, ?, ?)",
-      [name, username, email, phone, address, hashedPassword],
+      "INSERT INTO users (name, username, email, phone, address, password, role) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [name, username, email, phone, address, hashedPassword, role],
       (err) => {
         if (err) {
           console.error(err);
@@ -127,6 +140,31 @@ app.post("/register", async (req, res) => {
 
 app.get("/404", (req, res) => {
   res.render("404.ejs");
+});
+
+// Route to create admin user (for initial setup)
+app.post("/create-admin", async (req, res) => {
+  const { name, username, email, phone, address, password } = req.body;
+
+  try {
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const role = 'admin';
+
+    dbConnection.query(
+      "INSERT INTO users (name, username, email, phone, address, password, role) VALUES (?, ?, ?, ?, ?, ?, ?)",
+      [name, username, email, phone, address, hashedPassword, role],
+      (err) => {
+        if (err) {
+          console.error(err);
+          return res.send("Error creating admin user");
+        }
+        res.send("Admin user created successfully");
+      }
+    );
+  } catch (error) {
+    console.error(error);
+    res.send("Server error");
+  }
 });
 
 app.get('/listings', (req, res) => {
@@ -181,7 +219,7 @@ app.get('/wishlist', (req, res) => {
   });
 });
 
-app.get("/admin", (req, res) => {
+app.get("/admin", requireAdmin, (req, res) => {
   dbConnection.query("SELECT * FROM lands", (err, results) => {
     if (err) throw err;
     // This renders the admin page and sends the data from the DB
@@ -189,7 +227,50 @@ app.get("/admin", (req, res) => {
   });
 });
 
-app.post("/admin/add", upload.single("image"), (req, res) => {
+// Route to fetch all users for admin management
+app.get("/admin/users", requireAdmin, (req, res) => {
+  dbConnection.query("SELECT id, name, username, email, phone, role, created_at FROM users ORDER BY created_at DESC", (err, users) => {
+    if (err) {
+      console.error("Error fetching users:", err);
+      return res.status(500).send("Error fetching users");
+    }
+    res.json(users);
+  });
+});
+
+// Route to update user role
+app.post("/admin/users/update-role", requireAdmin, (req, res) => {
+  console.log("Role update request received:", req.body);
+  const { userId, newRole } = req.body;
+  
+  if (!userId || !newRole) {
+    console.log("Missing userId or newRole:", { userId, newRole });
+    return res.status(400).json({ error: "User ID and role are required" });
+  }
+  
+  if (!['user', 'seller', 'admin'].includes(newRole)) {
+    console.log("Invalid role:", newRole);
+    return res.status(400).json({ error: "Invalid role. Must be 'user', 'seller', or 'admin'" });
+  }
+  
+  console.log("Updating user role:", { userId, newRole });
+  dbConnection.query("UPDATE users SET role = ? WHERE id = ?", [newRole, userId], (err, result) => {
+    if (err) {
+      console.error("Error updating user role:", err);
+      return res.status(500).json({ error: "Error updating user role" });
+    }
+    
+    console.log("Update result:", result);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "User not found" });
+    }
+    
+    console.log("User role updated successfully");
+    res.json({ success: true, message: "User role updated successfully" });
+  });
+});
+
+app.post("/admin/add", requireAdmin, upload.single("image"), (req, res) => {
   const { title, description, location, price, size_in_acres, category, seller_id } = req.body;
   const image_url = `/images/${req.file.filename}`;
 
@@ -206,7 +287,7 @@ app.post("/admin/add", upload.single("image"), (req, res) => {
 // DELETE listing by ID (from Admin Panel)
 
 
-app.post("/admin/delete/:id", (req, res) => {
+app.post("/admin/delete/:id", requireAdmin, (req, res) => {
   const landId = req.params.id;
 
   // Step 1: Fetch the image path from the DB
@@ -298,6 +379,71 @@ app.post("/messages/send", (req, res) => {
     res.redirect(`/messages/${listing_id}/${receiver_id}`);
   });
 });
+
+app.get("/messages", (req, res) => {
+  if (!req.session.userId) {
+    return res.redirect("/login");
+  }
+
+  const userId = req.session.userId;
+
+  const sql = `
+    SELECT m.*, 
+           s.username AS sender_name,
+           r.username AS receiver_name,
+           l.title AS listing_title
+    FROM messages m
+    JOIN users s ON m.sender_id = s.id
+    JOIN users r ON m.receiver_id = r.id
+    LEFT JOIN lands l ON m.listing_id = l.id
+    WHERE m.sender_id = ? OR m.receiver_id = ?
+    ORDER BY m.sent_at DESC
+  `;
+
+  dbConnection.query(sql, [userId, userId], (err, results) => {
+    if (err) {
+      console.error("Error fetching messages:", err);
+      return res.status(500).send("Error fetching messages");
+    }
+
+    res.render("messages", { messages: results, userId });
+  });
+});
+
+app.post("/messages/reply/:id", (req, res) => {
+  if (!req.session.userId) return res.redirect("/login");
+
+  const { id } = req.params; // original message id
+  const { reply } = req.body;
+
+  // Find the original message to get receiver_id and listing_id
+  const findSql = "SELECT * FROM messages WHERE id = ?";
+  dbConnection.query(findSql, [id], (err, result) => {
+    if (err || result.length === 0) {
+      console.error(err);
+      return res.status(404).send("Original message not found");
+    }
+
+    const original = result[0];
+    const senderId = req.session.userId;
+    const receiverId = original.sender_id === senderId ? original.receiver_id : original.sender_id;
+
+    const insertSql = `
+      INSERT INTO messages (sender_id, receiver_id, listing_id, message)
+      VALUES (?, ?, ?, ?)
+    `;
+    dbConnection.query(insertSql, [senderId, receiverId, original.listing_id, reply], (err2) => {
+      if (err2) {
+        console.error("Error sending reply:", err2);
+        return res.status(500).send("Error sending reply");
+      }
+      res.redirect("/messages");
+    });
+  });
+});
+
+
+
 
 
 

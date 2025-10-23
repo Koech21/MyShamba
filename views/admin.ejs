@@ -18,50 +18,117 @@
   </header>
 
   <main class="admin-container">
-    <section class="add-form">
-      <h2>Add New Listing</h2>
-      <form action="/admin/add" method="POST" enctype="multipart/form-data">
-        <div class="form-grid">
-          <input type="text" name="title" placeholder="Title" required>
-          <input type="text" name="location" placeholder="Location" required>
-          <input type="number" name="price" placeholder="Price (Ksh)" required>
-          <input type="number" step="0.1" name="size" placeholder="Size (acres)" required>
-          <input type="text" name="category" placeholder="Category (e.g., Residential)" required>
-          <input type="text" name="seller_id" placeholder="Seller ID" required>
-          <textarea name="description" placeholder="Description" rows="3"></textarea>
-          <input type="file" name="image" accept="image/*" required>
-        </div>
-        <button type="submit" class="add-btn">Add Listing</button>
-      </form>
-    </section>
+    <!-- Navigation Tabs -->
+    <div class="admin-tabs">
+      <button class="tab-btn active" data-tab="listings">Manage Listings</button>
+      <button class="tab-btn" data-tab="users">Manage Users</button>
+    </div>
 
-    <section class="listings-section">
-      <h2>Current Listings</h2>
-      <div class="listings-grid">
-        <% lands.forEach(land => { %>
-          <div class="listing-card <%= land.is_sold ? 'sold' : '' %>">
-            <img src="<%= land.image_url %>" alt="<%= land.title %>">
-            <div class="info">
-              <h3><%= land.title %></h3>
-              <p class="category"><%= land.category %></p>
-              <p><strong>Location:</strong> <%= land.location %></p>
-              <p><strong>Price:</strong> Ksh <%= land.price.toLocaleString() %></p>
-              <p><strong>Size:</strong> <%= land.size %> acres</p>
-            </div>
-            <div class="actions">
-              <% if (land.is_sold) { %>
-                <span class="sold-badge">SOLD</span>
-              <% } else { %>
-                <form action="/admin/delete/<%= land.id %>" method="POST">
-                  <button class="delete-btn">Remove</button>
-                </form>
-              <% } %>
-            </div>
+    <!-- Listings Tab -->
+    <div class="tab-content" id="listings-tab">
+      <section class="add-form">
+        <h2>Add New Listing</h2>
+        <form action="/admin/add" method="POST" enctype="multipart/form-data">
+          <div class="form-grid">
+            <input type="text" name="title" placeholder="Title" required>
+            <input type="text" name="location" placeholder="Location" required>
+            <input type="number" name="price" placeholder="Price (Ksh)" required>
+            <input type="number" step="0.1" name="size" placeholder="Size (acres)" required>
+            <input type="text" name="category" placeholder="Category (e.g., Residential)" required>
+            <input type="text" name="seller_id" placeholder="Seller ID" required>
+            <textarea name="description" placeholder="Description" rows="3"></textarea>
+            <input type="file" name="image" accept="image/*" required>
           </div>
-        <% }) %>
-      </div>
-    </section>
+          <button type="submit" class="add-btn">Add Listing</button>
+        </form>
+      </section>
+      
+      <section class="listings-section">
+        <h2>Current Listings</h2>
+        <div class="listings-grid">
+          <% lands.forEach(land => { %>
+            <div class="listing-card <%= land.is_sold ? 'sold' : '' %>">
+              <img src="<%= land.image_url %>" alt="<%= land.title %>">
+              <div class="info">
+                <h3><%= land.title %></h3>
+                <p class="category"><%= land.category %></p>
+                <p><strong>Location:</strong> <%= land.location %></p>
+                <p><strong>Price:</strong> Ksh <%= land.price.toLocaleString() %></p>
+                <p><strong>Size:</strong> <%= land.size_in_acres %> acres</p>
+              </div>
+              <div class="actions">
+                <% if (land.is_sold) { %>
+                  <span class="sold-badge">SOLD</span>
+                <% } else { %>
+                  <form action="/admin/delete/<%= land.id %>" method="POST">
+                    <button class="delete-btn">Remove</button>
+                  </form>
+                <% } %>
+              </div>
+            </div>
+          <% }) %>
+        </div>
+      </section>
+    </div>
+
+    <!-- Users Tab -->
+    <div class="tab-content" id="users-tab" style="display: none;">
+      <section class="users-section">
+        <h2>User Management</h2>
+        <div class="users-container">
+          <div class="users-loading" id="users-loading">
+            <p>Loading users...</p>
+          </div>
+          <div class="users-table-container" id="users-table-container" style="display: none;">
+            <table class="users-table">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Username</th>
+                  <th>Email</th>
+                  <th>Phone</th>
+                  <th>Current Role</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="users-table-body">
+                <!-- Users will be loaded here -->
+              </tbody>
+            </table>
+          </div>
+          <div class="users-error" id="users-error" style="display: none;">
+            <p>Error loading users. Please try again.</p>
+            <button onclick="loadUsers()" class="retry-btn">Retry</button>
+          </div>
+        </div>
+      </section>
+    </div>
   </main>
+  
+  <!-- Role Change Modal -->
+  <div id="roleModal" class="modal">
+    <div class="modal-content">
+      <span class="close">&times;</span>
+      <h3>Change User Role</h3>
+      <p>User: <span id="modal-user-name"></span></p>
+      <form id="roleChangeForm">
+        <input type="hidden" id="modal-user-id">
+        <div class="form-group">
+          <label for="newRole">New Role:</label>
+          <select id="newRole" required>
+            <option value="">Select Role</option>
+            <option value="user">User</option>
+            <option value="seller">Seller</option>
+            <option value="admin">Admin</option>
+          </select>
+        </div>
+        <button type="submit" class="update-role-btn">Update Role</button>
+      </form>
+    </div>
+  </div>
+
   <script src="/js/main.js"></script>
+  <script src="/js/admin.js"></script>
 </body>
 </html>

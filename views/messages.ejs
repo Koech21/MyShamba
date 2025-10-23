@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Your Messages | PLOTTOSHA</title>
+  <link rel="stylesheet" href="/css/messages.css">
+</head>
+<body>
+  <%- include("partials/navbar") %>
+
+  <section class="messages-page">
+    <h1>Your Messages</h1>
+
+    <% if (messages.length === 0) { %>
+      <p class="empty">You have no messages yet.</p>
+    <% } else { %>
+      <div class="messages-list">
+        <% messages.forEach(msg => { %>
+          <div class="message-card <%= msg.sender_id === userId ? 'sent' : 'received' %>">
+            <div class="message-header">
+              <strong><%= msg.sender_id === userId ? 'You' : msg.sender_name %></strong>
+              <span> → </span>
+              <strong><%= msg.receiver_id === userId ? 'You' : msg.receiver_name %></strong>
+            </div>
+
+            <% if (msg.listing_title) { %>
+              <p class="listing-ref">Regarding: <%= msg.listing_title %></p>
+            <% } %>
+
+            <p class="message-body"><%= msg.message %></p>
+            <span class="time"><%= new Date(msg.sent_at).toLocaleString() %></span>
+            
+            <% if (msg.sender_id !== userId) { %>
+              <a href="/messages/<%= msg.listing_id %>/<%= msg.sender_id %>" class="reply-btn">Reply</a>
+            <% } %>
+          </div>
+        <% }) %>
+      </div>
+    <% } %>
+  </section>
+
+  <footer>
+    <p>© <%= new Date().getFullYear() %> PLOTTOSHA</p>
+  </footer>
+  <script src="/js/main.js"></script>
+</body>
+</html>

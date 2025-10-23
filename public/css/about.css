@@ -1,9 +1,14 @@
-/* GLOBAL FONT AND COLORS */
+/* Reset & base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 body {
-    font-family: 'Poppins', sans-serif;
-    margin: 0;
-    color: #333;
-    background: linear-gradient(to right, #0d9f4b, #f7931e);
+  font-family: 'Poppins', sans-serif;
+  color: #222;
+  background: linear-gradient(to right, #0d9f4b, #f7931e);
+  line-height: 1.6;
 }
   /* HERO SECTION */
   .about-hero {

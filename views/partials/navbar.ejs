@@ -4,6 +4,10 @@
     <li><a href="/">Home</a></li>
     <li><a href="/listings">Land Listings</a></li>
     <li><a href="/about">About</a></li>
+    <li><a href="/messages">Messages</a></li>
+    <% if (user && user.isLoggedIn && user.role === 'admin') { %>
+      <li><a href="/admin">Admin Dashboard</a></li>
+    <% } %>
     <% if (user && user.isLoggedIn) { %>
       <li class="welcome-msg">Welcome, <%= user.username %> 👋</li>
       <li><a href="/logout" class="logout-btn">Logout</a></li>
@@ -22,6 +26,10 @@
       <li><a href="/">Home</a></li>
       <li><a href="/listings">Land Listings</a></li>
       <li><a href="/about">About</a></li>
+      <li><a href="/messages">Messages</a></li>
+      <% if (user && user.isLoggedIn && user.role === 'admin') { %>
+        <li><a href="/admin">Admin Dashboard</a></li>
+      <% } %>
       <% if (user && user.isLoggedIn) { %>
         <li class="welcome-msg">Welcome, <%= user.username %> 👋</li>
         <li><a href="/logout" class="logout-btn">Logout</a></li>
