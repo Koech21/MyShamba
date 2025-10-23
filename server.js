@@ -9,11 +9,11 @@ const nodemailer = require("nodemailer");
 
 
 const dbConnection = mysql.createConnection({
-  host: "localhost",
+  host: "ballast.proxy.rlwy.net",
   user: "root",
-  password: "admin123",
-  database: "land_ecommerce",
-  port: 3307,
+  password: "HcyvppwcVjGtpneHrgVypkaUlDbsLmgk",
+  database: "railway",
+  port: 29259,
 });
 // test db connection
 dbConnection.connect((error) => {
