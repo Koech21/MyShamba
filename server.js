@@ -149,7 +149,7 @@ app.post("/register", async (req, res) => {
 
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const role = 'user'; // Default role for new users
+    const role = 'buyer'; // Default role for new users
 
     dbConnection.query(
       "INSERT INTO users (name, username, email, phone, address, password, role) VALUES (?, ?, ?, ?, ?, ?, ?)",
