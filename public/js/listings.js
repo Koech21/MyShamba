@@ -1,21 +1,38 @@
 const searchInput = document.getElementById("searchInput");
 const listingsContainer = document.getElementById("listingsContainer");
+const wishlistToggle = document.getElementById("wishlistToggle");
+const wishlistCount = document.getElementById("wishlistCount");
 let wishlist = JSON.parse(localStorage.getItem("plottosha-wishlist") || "[]");
+let wishlistOnly = false;
 
-searchInput.addEventListener("input", () => {
-  const query = searchInput.value.toLowerCase();
+function applyFilters() {
+  const query = (searchInput?.value || "").toLowerCase();
   const cards = document.querySelectorAll(".listing-card");
 
+  const wishedIds = new Set(wishlist.map(w => String(w.id)));
+
   cards.forEach(card => {
+    const id = String(card.getAttribute('data-id'));
     const title = card.querySelector("h2").textContent.toLowerCase();
     const location = card.querySelector(".location").textContent.toLowerCase();
     const category = card.querySelector(".category").textContent.toLowerCase();
 
-    card.style.display =
-      title.includes(query) || location.includes(query) || category.includes(query)
-        ? "block"
-        : "none";
+    const matchesSearch = title.includes(query) || location.includes(query) || category.includes(query);
+    const matchesWishlist = !wishlistOnly || wishedIds.has(id);
+
+    card.style.display = matchesSearch && matchesWishlist ? "block" : "none";
+
+    syncCardState(card, wishedIds.has(id));
   });
+}
+
+searchInput?.addEventListener("input", applyFilters);
+
+wishlistToggle?.addEventListener("click", () => {
+  wishlistOnly = !wishlistOnly;
+  wishlistToggle.classList.toggle('active', wishlistOnly);
+  wishlistToggle.textContent = wishlistOnly ? 'Showing Wishlist' : 'Show Wishlist';
+  applyFilters();
 });
 
 function toggleWishlist(id) {
@@ -39,6 +56,8 @@ function toggleWishlist(id) {
   }
 
   localStorage.setItem("plottosha-wishlist", JSON.stringify(wishlist));
+  updateWishlistUI();
+  applyFilters();
 }
 
 function showToast(message) {
@@ -48,3 +67,23 @@ function showToast(message) {
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), 3000);
 }
+
+function updateWishlistUI() {
+  if (wishlistCount) wishlistCount.textContent = String(wishlist.length);
+}
+
+function syncCardState(card, isSaved) {
+  const btn = card.querySelector('.wishlist-btn');
+  if (!btn) return;
+  if (isSaved) {
+    btn.textContent = '❤️ Saved';
+    btn.classList.add('saved');
+  } else {
+    btn.textContent = '❤️ Save';
+    btn.classList.remove('saved');
+  }
+}
+
+// initial paint
+updateWishlistUI();
+applyFilters();
