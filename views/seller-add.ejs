@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Add Listing | PLOTTOSHA</title>
+  <link rel="stylesheet" href="/css/common.css">
+  <link rel="stylesheet" href="/css/admin.css">
+  <link rel="stylesheet" href="/css/seller.css">
+  <script>
+    function formatPriceInput(e){
+      const val = e.value.replace(/[^\d]/g,'');
+      if(!val){ e.value=''; return; }
+      e.value = new Intl.NumberFormat('en-KE').format(Number(val));
+    }
+    function previewImage(input){
+      const img = document.getElementById('imgPreview');
+      if(input.files && input.files[0]){
+        const reader = new FileReader();
+        reader.onload = e => { img.src = e.target.result; img.style.display = 'block'; };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+  </script>
+</head>
+<body>
+  <%- include('partials/navbar') %>
+
+  <section class="seller-form">
+    <h1>Add a New Listing</h1>
+    <form action="/seller/listings" method="POST" enctype="multipart/form-data">
+      <div class="grid">
+        <div>
+          <label>Title</label>
+          <input type="text" name="title" required>
+        </div>
+        <div>
+          <label>Location</label>
+          <input type="text" name="location" required>
+        </div>
+        <div>
+          <label>Price (Ksh)</label>
+          <input type="text" name="price" required oninput="formatPriceInput(this)">
+        </div>
+        <div>
+          <label>Size (acres)</label>
+          <input type="number" name="size_in_acres" step="0.01" required>
+        </div>
+        <div>
+          <label>Category</label>
+          <select name="category" required>
+            <option value="Residential">Residential</option>
+            <option value="Commercial">Commercial</option>
+            <option value="Agricultural">Agricultural</option>
+          </select>
+        </div>
+        <div>
+          <label>Image</label>
+          <input type="file" name="image" accept="image/*" required onchange="previewImage(this)">
+          <div class="preview"><img id="imgPreview" alt="Preview"></div>
+        </div>
+      </div>
+      <div class="full" style="margin-top:12px;">
+        <label>Description</label>
+        <textarea name="description" required></textarea>
+      </div>
+      <div class="actions">
+        <button type="submit" class="btn">Add Listing</button>
+        <a href="/listings" class="btn-outline">Cancel</a>
+      </div>
+    </form>
+  </section>
+
+  <footer>
+    <p>© <%= new Date().getFullYear() %> PLOTTOSHA</p>
+  </footer>
+  <script src="/js/main.js"></script>
+</body>
+</html>
+
+

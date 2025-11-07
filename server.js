@@ -53,6 +53,17 @@ const requireAdmin = (req, res, next) => {
   next();
 };
 
+// Seller authentication middleware
+const requireSeller = (req, res, next) => {
+  if (!req.session.isLoggedIn) {
+    return res.redirect('/login');
+  }
+  if (req.session.role !== 'seller') {
+    return res.status(403).send('Access denied. Seller privileges required.');
+  }
+  next();
+};
+
 // Set storage engine
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -297,14 +308,44 @@ app.post("/admin/users/update-role", requireAdmin, (req, res) => {
 app.post("/admin/add", requireAdmin, upload.single("image"), (req, res) => {
   const { title, description, location, price, size_in_acres, category, seller_id } = req.body;
   const image_url = `/images/${req.file.filename}`;
+  const normalizedPrice = String(price).replace(/,/g, "");
 
   const sql = `
     INSERT INTO lands (title, description, location, price, size_in_acres, category, seller_id, image_url, created_at)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
   `;
-  dbConnection.query(sql, [title, description, location, price, size_in_acres, category, seller_id, image_url], (err) => {
+  dbConnection.query(sql, [title, description, location, normalizedPrice, size_in_acres, category, seller_id, image_url], (err) => {
     if (err) throw err;
     res.redirect("/admin");
+  });
+});
+
+// Seller add listing - form
+app.get("/seller/listings/new", requireSeller, (req, res) => {
+  res.render("seller-add.ejs");
+});
+
+// Seller add listing - submit
+app.post("/seller/listings", requireSeller, upload.single("image"), (req, res) => {
+  const { title, description, location, price, size_in_acres, category } = req.body;
+  const image_url = req.file ? `/images/${req.file.filename}` : null;
+  const seller_id = req.session.userId;
+  const normalizedPrice = String(price).replace(/,/g, "");
+
+  if (!title || !description || !location || !normalizedPrice || !size_in_acres || !category || !image_url) {
+    return res.status(400).send("All fields and an image are required");
+  }
+
+  const sql = `
+    INSERT INTO lands (title, description, location, price, size_in_acres, category, seller_id, image_url, created_at)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+  `;
+  dbConnection.query(sql, [title, description, location, normalizedPrice, size_in_acres, category, seller_id, image_url], (err) => {
+    if (err) {
+      console.error("Error adding seller listing:", err);
+      return res.status(500).send("Error adding listing");
+    }
+    res.redirect("/listings");
   });
 });
 

@@ -8,6 +8,9 @@
     <% if (user && user.isLoggedIn && user.role === 'admin') { %>
       <li><a href="/admin">Admin Dashboard</a></li>
     <% } %>
+    <% if (user && user.isLoggedIn && user.role === 'seller') { %>
+      <li><a href="/seller/listings/new">Add Listing</a></li>
+    <% } %>
     <% if (user && user.isLoggedIn) { %>
       <li class="welcome-msg">Welcome, <%= user.username %> 👋</li>
       <li><a href="/logout" class="logout-btn">Logout</a></li>
@@ -29,6 +32,9 @@
       <li><a href="/messages">Messages</a></li>
       <% if (user && user.isLoggedIn && user.role === 'admin') { %>
         <li><a href="/admin">Admin Dashboard</a></li>
+      <% } %>
+      <% if (user && user.isLoggedIn && user.role === 'seller') { %>
+        <li><a href="/seller/listings/new">Add Listing</a></li>
       <% } %>
       <% if (user && user.isLoggedIn) { %>
         <li class="welcome-msg">Welcome, <%= user.username %> 👋</li>
