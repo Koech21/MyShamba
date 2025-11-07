@@ -13,7 +13,7 @@
     <div class="chat-box">
       <% messages.forEach(msg => { %>
         <div class="chat-message <%= msg.sender_id === senderId ? 'sent' : 'received' %>">
-          <p><%= msg.message %></p>
+          <p><%- msg.message %></p>
           <small><small><%= new Date(msg.sent_at).toLocaleString() %></small>
         </small>
         </div>
@@ -26,8 +26,18 @@
       <input type="text" name="message" placeholder="Type your message..." required>
       <button type="submit">Send</button>
     </form>
+    <% if (user && (user.role === 'admin' || user.role === 'seller')) { %>
+      <form action="/send-payment-link" method="POST" class="payment-link-form">
+        <input type="hidden" name="receiver_id" value="<%= receiverId %>">
+        <input type="hidden" name="listing_id" value="<%= listingId %>">
+        <button type="submit" class="send-payment-btn">💰 Send Payment Link</button>
+      </form>
+    <% } %>
   </section>
 
+  <footer>
+    <p>© <%= new Date().getFullYear() %> PLOTTOSHA</p>
+  </footer>
 </body>
-<script src="main.js"></script>
+<script src="/js/main.js"></script>
 </html>

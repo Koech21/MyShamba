@@ -609,6 +609,88 @@ app.post("/messages/reply/:id", (req, res) => {
   });
 });
 
+app.get("/pay/:id", (req, res) => {
+  const landId = req.params.id;
+
+  const sql = "SELECT * FROM lands WHERE id = ?";
+  dbConnection.query(sql, [landId], (err, results) => {
+    if (err) {
+      console.error("Error loading land for payment:", err);
+      return res.status(500).send("Error fetching land details");
+    }
+
+    if (results.length === 0) {
+      return res.status(404).send("Land not found");
+    }
+
+    res.render("pay", { land: results[0] });
+  });
+});
+
+app.post("/confirm-payment/:id", (req, res) => {
+  const landId = req.params.id;
+
+  const sql = "SELECT * FROM lands WHERE id = ?";
+  dbConnection.query(sql, [landId], (err, results) => {
+    if (err) {
+      console.error("Error confirming payment:", err);
+      return res.status(500).send("Error processing payment");
+    }
+
+    if (results.length === 0) return res.status(404).send("Land not found");
+
+    // Mark land as sold only (skip transactions insert for presentation)
+    const updateLand = "UPDATE lands SET is_sold = 1 WHERE id = ?";
+    dbConnection.query(updateLand, [landId], (err3) => {
+      if (err3) {
+        console.error("Error updating land status:", err3);
+        return res.status(500).send("Error updating land status");
+      }
+
+      res.redirect(`/thank-you/${landId}`);
+    });
+  });
+});
+
+app.get("/thank-you/:id", (req, res) => {
+  const landId = req.params.id;
+  res.render("thankyou.ejs", { landId });
+}); 
+
+app.post("/send-payment-link", (req, res) => {
+  if (!req.session.userId) {
+    return res.redirect("/login");
+  }
+
+  const { receiver_id, listing_id } = req.body;
+  const sender_id = req.session.userId;
+
+  if (!['seller', 'admin'].includes(req.session.role)) {
+    return res.status(403).send('Only sellers or admins can send payment links.');
+  }
+
+  const landSql = "SELECT id, title FROM lands WHERE id = ?";
+  dbConnection.query(landSql, [listing_id], (err, result) => {
+    if (err || result.length === 0) {
+      console.error("Error fetching land for payment link:", err);
+      return res.status(500).send("Error preparing payment link");
+    }
+
+    const land = result[0];
+    const paymentLink = `/pay/${land.id}`;
+    const message = `Hello! Here is your payment link for <b>${land.title}</b>: <a href="${paymentLink}">Pay Now</a>`;
+
+    const insertSql = "INSERT INTO messages (sender_id, receiver_id, listing_id, message) VALUES (?, ?, ?, ?)";
+    dbConnection.query(insertSql, [sender_id, receiver_id, listing_id, message], (err2) => {
+      if (err2) {
+        console.error("Error sending payment link:", err2);
+        return res.status(500).send("Failed to send payment link");
+      }
+
+      res.redirect(`/messages/${listing_id}/${receiver_id}`);
+    });
+  });
+});
 
 
 

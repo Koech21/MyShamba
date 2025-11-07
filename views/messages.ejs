@@ -28,7 +28,7 @@
               <p class="listing-ref">Regarding: <%= msg.listing_title %></p>
             <% } %>
 
-            <p class="message-body"><%= msg.message %></p>
+            <p class="message-body"><%- msg.message %></p>
             <span class="time"><%= new Date(msg.sent_at).toLocaleString() %></span>
             
             <% if (msg.sender_id !== userId) { %>

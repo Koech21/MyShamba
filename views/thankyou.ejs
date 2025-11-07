@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Successful | PLOTTOSHA</title>
+  <link rel="stylesheet" href="/css/common.css" />
+  <link rel="stylesheet" href="/css/thankyou.css" />
+</head>
+<body>
+  <%- include('partials/navbar') %>
+  <section class="thankyou-container">
+    <h1>🎉 Thank You for Your Payment!</h1>
+    <p>Your order has been confirmed. You’ll receive updates soon.</p>
+    <a href="/listings" class="back-btn">← Back to Listings</a>
+  </section>
+
+  <footer>
+    <p>© <%= new Date().getFullYear() %> PLOTTOSHA</p>
+  </footer>
+  <script src="/js/main.js"></script>
+</body>
+</html>

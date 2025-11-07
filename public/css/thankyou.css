@@ -1,0 +1,52 @@
+body {
+    background-color: #f8f9fa;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+  }
+  
+  .thankyou-container {
+    background: white;
+    padding: 2rem 3rem;
+    border-radius: 1rem;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    margin-top: 6rem;
+    max-width: 600px;
+    width: 90%;
+  }
+  
+  .thankyou-container h1 {
+    color: #0d9f4b;
+    margin-bottom: 1rem;
+    font-size: 1.8rem;
+  }
+  
+  .thankyou-container p {
+    color: #333;
+    margin-bottom: 2rem;
+    font-size: 1rem;
+  }
+  
+  .back-btn {
+    display: inline-block;
+    background: #f7931e;
+    color: white;
+    text-decoration: none;
+    padding: 0.7rem 1.5rem;
+    border-radius: 8px;
+    transition: 0.3s;
+    font-weight: 500;
+  }
+  
+  .back-btn:hover {
+    background: #0d9f4b;
+    transform: scale(1.05);
+  }
+  
+/* footer styles come from common.css */
+  
+  
+/* Navbar, mobile menu, buttons come from common.css */

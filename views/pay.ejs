@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Payment for <%= land.title %> | PLOTTOSHA</title>
+  <link rel="stylesheet" href="/css/common.css" />
+  <link rel="stylesheet" href="/css/pay.css" />
+</head>
+<body>
+  <%- include('partials/navbar') %>
+
+  <section class="payment-container">
+    <h1>Pay for <%= land.title %></h1>
+    <p><strong>Location:</strong> <%= land.location %></p>
+    <p><strong>Price:</strong> Ksh <%= land.price.toLocaleString() %></p>
+
+    <form action="/confirm-payment/<%= land.id %>" method="POST">
+      <button class="pay-btn">Simulate Payment</button>
+    </form>
+  </section>
+
+  <footer>
+    <p>© <%= new Date().getFullYear() %> PLOTTOSHA</p>
+  </footer>
+  <script src="/js/main.js"></script>
+</body>
+</html>
